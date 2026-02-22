@@ -16,7 +16,7 @@ interface Props {
 export const ControlPanel: React.FC<Props> = ({
     config, setConfig, previewMode, setPreviewMode, onSuggest, onDownload, isDownloading
 }) => {
-    const handleChange = (key: keyof LogoConfig, value: string) => {
+    const handleChange = (key: keyof LogoConfig, value: string | number) => {
         setConfig(prev => ({ ...prev, [key]: value }));
     };
 
@@ -95,36 +95,6 @@ export const ControlPanel: React.FC<Props> = ({
 
             {/* Colors */}
             <div>
-                <label className="label" style={{ marginBottom: '12px' }}>Color Palette</label>
-
-                {/* Preset Palettes */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px' }}>
-                    {PALETTES.map((p, idx) => (
-                        <div
-                            key={idx}
-                            onClick={() => {
-                                handleChange('bgColor', p.bg);
-                                handleChange('textColor', p.text);
-                                handleChange('iconColor', p.icon);
-                            }}
-                            style={{
-                                display: 'flex',
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                                cursor: 'pointer',
-                                border: config.bgColor === p.bg && config.textColor === p.text ? '2px solid var(--accent)' : '1px solid var(--border)',
-                                flexShrink: 0
-                            }}
-                        >
-                            <div style={{ flex: 1, backgroundColor: p.bg }}></div>
-                            <div style={{ flex: 1, backgroundColor: p.text }}></div>
-                            <div style={{ flex: 1, backgroundColor: p.icon }}></div>
-                        </div>
-                    ))}
-                </div>
-
                 <label className="label">Color Palette Theme</label>
                 <select
                     className="input-field"
@@ -132,9 +102,7 @@ export const ControlPanel: React.FC<Props> = ({
                     onChange={e => {
                         const p = PALETTES.find(pal => pal.name === e.target.value);
                         if (p) {
-                            handleChange('bgColor', p.bg);
-                            handleChange('textColor', p.text);
-                            handleChange('iconColor', p.icon);
+                            setConfig(prev => ({ ...prev, bgColor: p.bg, textColor: p.text, iconColor: p.icon }));
                         }
                     }}
                     value={PALETTES.find(p => p.bg === config.bgColor && p.text === config.textColor && p.icon === config.iconColor)?.name || 'Custom'}
@@ -186,7 +154,7 @@ export const ControlPanel: React.FC<Props> = ({
                     type="range"
                     min="50" max="600"
                     value={config.iconSize}
-                    onChange={e => handleChange('iconSize', e.target.value)}
+                    onChange={e => handleChange('iconSize', Number(e.target.value))}
                     style={{ width: '100%', marginBottom: '16px' }}
                 />
 
@@ -198,7 +166,7 @@ export const ControlPanel: React.FC<Props> = ({
                     type="range"
                     min="20" max="250"
                     value={config.fontSize}
-                    onChange={e => handleChange('fontSize', e.target.value)}
+                    onChange={e => handleChange('fontSize', Number(e.target.value))}
                     style={{ width: '100%' }}
                 />
             </div>

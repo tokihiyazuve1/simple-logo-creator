@@ -1,3 +1,12 @@
+import {
+  ShoppingBag, Store, Package, Zap, Sparkles, Heart, Star,
+  Coffee, Box, Scissors, Crown, Diamond, Camera, Music,
+  Palette, BookOpen, Briefcase, Code, Cpu, Feather, Flame,
+  Gift, Globe, Headphones, Key, Leaf, MapPin, Moon, Sun,
+  Truck, Umbrella, Watch
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
 export interface LogoConfig {
   name: string;
   fontFamily: string;
@@ -6,8 +15,8 @@ export interface LogoConfig {
   bgColor: string;
   textColor: string;
   iconColor: string;
-  fontSize: number;    // 1 to 200
-  iconSize: number;    // 1 to 600
+  fontSize: number;    // 20 to 250
+  iconSize: number;    // 50 to 600
 }
 
 export const FONTS = [
@@ -32,6 +41,15 @@ export const ICONS = [
   'Truck', 'Umbrella', 'Watch'
 ];
 
+// Explicit map of only the icons we use — enables tree-shaking of the full Lucide library
+export const ICON_MAP: Record<string, LucideIcon> = {
+  ShoppingBag, Store, Package, Zap, Sparkles, Heart, Star,
+  Coffee, Box, Scissors, Crown, Diamond, Camera, Music,
+  Palette, BookOpen, Briefcase, Code, Cpu, Feather, Flame,
+  Gift, Globe, Headphones, Key, Leaf, MapPin, Moon, Sun,
+  Truck, Umbrella, Watch
+};
+
 export const PALETTES = [
   // Dark Themes
   { name: 'Midnight Blue', bg: '#0f172a', text: '#ffffff', icon: '#3b82f6' },
@@ -43,7 +61,7 @@ export const PALETTES = [
   // Light / Minimalist Themes
   { name: 'Classic Monochrome', bg: '#ffffff', text: '#000000', icon: '#000000' },
   { name: 'Clean Slate', bg: '#f8fafc', text: '#334155', icon: '#64748b' },
-  { name: 'Cream \u0026 Coffee', bg: '#fafaf9', text: '#44403c', icon: '#78716c' },
+  { name: 'Cream & Coffee', bg: '#fafaf9', text: '#44403c', icon: '#78716c' },
   { name: 'Soft Peach', bg: '#fff1f2', text: '#881337', icon: '#f43f5e' },
   { name: 'Mint Breeze', bg: '#f0fdf4', text: '#14532d', icon: '#22c55e' },
 

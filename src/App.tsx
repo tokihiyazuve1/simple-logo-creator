@@ -1,13 +1,12 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
-import * as LucideIcons from 'lucide-react';
 
 import { LogoPreview } from './components/LogoPreview';
 import { ControlPanel } from './components/ControlPanel';
-import { PALETTES, FONTS, ICONS } from './types';
+import { PALETTES, FONTS, ICONS, ICON_MAP } from './types';
 import type { LogoConfig } from './types';
 
 import './index.css';
@@ -45,7 +44,7 @@ function App() {
   };
 
   const generateSvgString = (currentConfig: LogoConfig) => {
-    const IconComponent = (LucideIcons as any)[currentConfig.icon] || LucideIcons.ShoppingBag;
+    const IconComponent = ICON_MAP[currentConfig.icon] || ICON_MAP['ShoppingBag'];
 
     const isIconOnly = currentConfig.layout === 'icon-only';
     const isTextOnly = currentConfig.layout === 'text-only';
@@ -59,20 +58,14 @@ function App() {
       <IconComponent size={iconSize} color={currentConfig.iconColor} strokeWidth={1.5} />
     );
 
-    // Extract inner contents of the Lucide SVG to embed it easily
-    // const innerIconMatch = iconMarkup.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
-
     // SVG coordinates must match the React DOM layout closely
     // 800 center is 400.
-    // If row: tighter gap means icon is less far left, text is less far right.
     const gap = 24;
 
-    // Approximate total width of icon + gap + text (very rough estimate since text width varies)
-    // Let's just hardcode a visual center that looks better than before.
     const textY = isRow ? 400 + (fontSize * 0.35) : (isIconOnly ? 0 : 580);
-    const textX = isRow ? 440 - (gap / 2) : 400; // Shift text left slightly
+    const textX = isRow ? 440 - (gap / 2) : 400;
     const iconY = isRow ? 400 - (iconSize / 2) : (isTextOnly ? 0 : 220);
-    const iconX = isRow ? 160 + (gap / 2) : (400 - (iconSize / 2)); // Shift icon right slightly
+    const iconX = isRow ? 160 + (gap / 2) : (400 - (iconSize / 2));
 
     let content = '';
 
@@ -111,41 +104,35 @@ function App() {
     isTransparent: boolean
   ): Promise<{ pngBlob: Blob | null, svgString: string }> => {
 
-    // Temporarily apply the target config to the DOM ref for html2canvas
     if (!forcedRef.current) return { pngBlob: null, svgString: '' };
 
     const el = forcedRef.current;
     const originalBg = el.style.backgroundColor;
 
-    // SVG is pure data driven, so we can generate it immediately
     const svgString = generateSvgString(targetConfig);
 
-    // For PNG, we update DOM
     el.style.backgroundColor = isTransparent ? 'transparent' : targetConfig.bgColor;
 
     if (targetConfig.textColor !== config.textColor) {
-      // Deep traverse to force colors for monochrome
       const textNode = Array.from(el.children).find(c => c.tagName === 'DIV') as HTMLElement;
       if (textNode) textNode.style.color = targetConfig.textColor;
 
       const svgNode = Array.from(el.children).find(c => c.tagName === 'svg') as HTMLElement;
-      if (svgNode) svgNode.style.color = targetConfig.iconColor; // Lucide uses currentColor sometimes
+      if (svgNode) svgNode.style.color = targetConfig.iconColor;
     }
 
-    // Small delay to ensure DOM paints
     await new Promise(r => setTimeout(r, 50));
 
     const canvas = await html2canvas(el, {
       backgroundColor: isTransparent ? null : targetConfig.bgColor,
-      scale: 2, // 1600x1600 output for crispness
+      scale: 2,
       logging: false,
     });
 
-    // Reset DOM
     el.style.backgroundColor = originalBg;
     if (targetConfig.textColor !== config.textColor) {
       const textNode = Array.from(el.children).find(c => c.tagName === 'DIV') as HTMLElement;
-      if (textNode) textNode.style.color = config.textColor; // REVERT to current config, not originalColor which is empty string
+      if (textNode) textNode.style.color = config.textColor;
       const svgNode = Array.from(el.children).find(c => c.tagName === 'svg') as HTMLElement;
       if (svgNode) svgNode.style.color = config.iconColor;
     }

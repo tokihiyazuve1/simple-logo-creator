@@ -116,3 +116,24 @@ input[type="color"]::-webkit-color-swatch {
   border: 1px solid var(--border);
   border-radius: 8px;
 }
+
+/* Logo Preview */
+.preview-container {
+  width: 400px;
+  height: 400px;
+  background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAHUlEQVQ4jWNgYGD4Twzu6FhFFGYYNXDUwGFpIAAAxG8v8Rofxt0AAAAASUVORK5CYII=');
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-radius 0.3s ease;
+}
+
+.preview-container.circle {
+  border-radius: 50%;
+}
+
+.preview-scaler.circle-crop {
+  border-radius: 50%;
+  overflow: hidden;
+}
