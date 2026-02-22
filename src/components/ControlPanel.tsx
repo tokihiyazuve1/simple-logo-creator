@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FONTS, ICONS, PALETTES } from '../types';
+import { FONTS, ICONS, PALETTES, ICON_MAP } from '../types';
 import type { LogoConfig } from '../types';
 import { RefreshCw, Download, ChevronDown } from 'lucide-react';
 
@@ -24,6 +24,68 @@ const PaletteSwatch: React.FC<{ bg: string; text: string; icon: string }> = ({ b
     </div>
 );
 
+/* Reusable custom dropdown */
+function CustomDropdown<T extends { label: string; value: string }>({
+    items, value, onChange, renderItem, label
+}: {
+    items: T[];
+    value: string;
+    onChange: (value: string) => void;
+    renderItem: (item: T, isActive: boolean) => React.ReactNode;
+    label: string;
+}) {
+    const [open, setOpen] = useState(false);
+    const active = items.find(i => i.value === value);
+
+    return (
+        <div style={{ position: 'relative' }}>
+            <label className="label">{label}</label>
+            <button
+                type="button"
+                className="input-field"
+                onClick={() => setOpen(!open)}
+                style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    cursor: 'pointer', textAlign: 'left', width: '100%',
+                }}
+            >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+                    {active ? renderItem(active, true) : 'Select...'}
+                </span>
+                <ChevronDown size={14} style={{ opacity: 0.5, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+            </button>
+
+            {open && (
+                <div style={{
+                    position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                    marginTop: '4px', maxHeight: '220px', overflowY: 'auto',
+                    background: 'rgba(15, 23, 42, 0.98)', border: '1px solid var(--border)',
+                    borderRadius: '8px', boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+                }}>
+                    {items.map(item => (
+                        <button
+                            key={item.value}
+                            type="button"
+                            onClick={() => { onChange(item.value); setOpen(false); }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '10px',
+                                width: '100%', padding: '7px 12px',
+                                background: item.value === value ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                                border: 'none', color: 'white', cursor: 'pointer',
+                                fontSize: '0.85rem', textAlign: 'left',
+                            }}
+                            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
+                            onMouseLeave={e => (e.currentTarget.style.background = item.value === value ? 'rgba(59, 130, 246, 0.15)' : 'transparent')}
+                        >
+                            {renderItem(item, false)}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export const ControlPanel: React.FC<Props> = ({
     config, setConfig, previewMode, setPreviewMode, onSuggest, onDownload, isDownloading
 }) => {
@@ -31,44 +93,52 @@ export const ControlPanel: React.FC<Props> = ({
         setConfig(prev => ({ ...prev, [key]: value }));
     };
 
-    const [paletteOpen, setPaletteOpen] = useState(false);
-    const activePalette = PALETTES.find(p => p.bg === config.bgColor && p.text === config.textColor && p.icon === config.iconColor);
+    const paletteItems = PALETTES.map(p => ({
+        label: p.name, value: p.name,
+        bg: p.bg, text: p.text, icon: p.icon,
+    }));
+    const activePaletteName = PALETTES.find(p => p.bg === config.bgColor && p.text === config.textColor && p.icon === config.iconColor)?.name || '';
+
+    const iconItems = ICONS.map(name => ({ label: name, value: name }));
 
     return (
-        <div className="panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
             {/* Primary Actions */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-                <button className="btn" style={{ flex: 1 }} onClick={onSuggest}>
-                    <RefreshCw size={16} /> Suggest Design
+            <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="btn" style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem' }} onClick={onSuggest}>
+                    <RefreshCw size={14} /> Suggest
                 </button>
                 <button
                     className="btn"
-                    style={{ flex: 1, backgroundColor: '#10b981' }}
+                    style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', backgroundColor: '#10b981' }}
                     onClick={onDownload}
                     disabled={isDownloading}
                 >
-                    <Download size={16} /> {isDownloading ? 'Generating...' : 'Download All'}
+                    <Download size={14} /> {isDownloading ? 'Generating...' : 'Download'}
                 </button>
             </div>
 
-            <hr style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+            <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: 0 }} />
 
-            {/* Content */}
-            <div>
-                <label className="label">Shop Name</label>
-                <input
-                    type="text"
-                    className="input-field"
-                    value={config.name}
-                    onChange={e => handleChange('name', e.target.value)}
-                    placeholder="My Awesome Shop"
-                />
-            </div>
+            {/* Two-column controls grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                {/* Shop Name — full width */}
+                <div style={{ gridColumn: '1 / -1' }}>
+                    <label className="label">Shop Name</label>
+                    <input
+                        type="text"
+                        className="input-field"
+                        value={config.name}
+                        onChange={e => handleChange('name', e.target.value)}
+                        placeholder="My Awesome Shop"
+                    />
+                </div>
+
+                {/* Font */}
                 <div>
-                    <label className="label">Font Family</label>
+                    <label className="label">Font</label>
                     <select
                         className="input-field"
                         value={config.fontFamily}
@@ -78,6 +148,7 @@ export const ControlPanel: React.FC<Props> = ({
                     </select>
                 </div>
 
+                {/* Layout */}
                 <div>
                     <label className="label">Layout</label>
                     <select
@@ -91,162 +162,106 @@ export const ControlPanel: React.FC<Props> = ({
                         <option value="icon-only">Icon Only</option>
                     </select>
                 </div>
-            </div>
 
-            {/* Icon */}
-            <div>
-                <label className="label">Icon</label>
-                <select
-                    className="input-field"
-                    value={config.icon}
-                    onChange={e => handleChange('icon', e.target.value)}
-                >
-                    {ICONS.map(i => <option key={i} value={i}>{i}</option>)}
-                </select>
-            </div>
-
-            <hr style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
-
-            {/* Colors */}
-            <div>
-                <label className="label">Color Palette Theme</label>
-
-                {/* Custom Dropdown with Color Previews */}
-                <div style={{ position: 'relative', marginBottom: '16px' }}>
-                    <button
-                        type="button"
-                        className="input-field"
-                        onClick={() => setPaletteOpen(!paletteOpen)}
-                        style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            cursor: 'pointer', textAlign: 'left', width: '100%',
+                {/* Icon — full width with preview */}
+                <div style={{ gridColumn: '1 / -1' }}>
+                    <CustomDropdown
+                        label="Icon"
+                        items={iconItems}
+                        value={config.icon}
+                        onChange={val => handleChange('icon', val)}
+                        renderItem={(item) => {
+                            const Ic = ICON_MAP[item.value];
+                            return (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {Ic && <Ic size={16} strokeWidth={1.5} />}
+                                    <span>{item.label}</span>
+                                </span>
+                            );
                         }}
-                    >
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            {activePalette ? (
-                                <>
-                                    <PaletteSwatch bg={activePalette.bg} text={activePalette.text} icon={activePalette.icon} />
-                                    {activePalette.name}
-                                </>
-                            ) : (
-                                'Custom...'
-                            )}
-                        </span>
-                        <ChevronDown size={14} style={{ opacity: 0.5, transform: paletteOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                    </button>
-
-                    {paletteOpen && (
-                        <div style={{
-                            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-                            marginTop: '4px', maxHeight: '240px', overflowY: 'auto',
-                            background: 'rgba(15, 23, 42, 0.98)', border: '1px solid var(--border)',
-                            borderRadius: '8px', boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
-                        }}>
-                            {PALETTES.map(p => (
-                                <button
-                                    key={p.name}
-                                    type="button"
-                                    onClick={() => {
-                                        setConfig(prev => ({ ...prev, bgColor: p.bg, textColor: p.text, iconColor: p.icon }));
-                                        setPaletteOpen(false);
-                                    }}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: '10px',
-                                        width: '100%', padding: '8px 12px',
-                                        background: activePalette?.name === p.name ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                                        border: 'none', color: 'white', cursor: 'pointer',
-                                        fontSize: '0.9rem', textAlign: 'left',
-                                    }}
-                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-                                    onMouseLeave={e => (e.currentTarget.style.background = activePalette?.name === p.name ? 'rgba(59, 130, 246, 0.15)' : 'transparent')}
-                                >
-                                    <PaletteSwatch bg={p.bg} text={p.text} icon={p.icon} />
-                                    <span>{p.name}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                    />
                 </div>
 
-                {/* Manual Pickers */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                {/* Palette — full width with preview */}
+                <div style={{ gridColumn: '1 / -1' }}>
+                    <CustomDropdown
+                        label="Color Palette"
+                        items={paletteItems}
+                        value={activePaletteName}
+                        onChange={val => {
+                            const p = PALETTES.find(pal => pal.name === val);
+                            if (p) setConfig(prev => ({ ...prev, bgColor: p.bg, textColor: p.text, iconColor: p.icon }));
+                        }}
+                        renderItem={(item) => (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <PaletteSwatch bg={(item as any).bg} text={(item as any).text} icon={(item as any).icon} />
+                                <span>{item.label}</span>
+                            </span>
+                        )}
+                    />
+                </div>
+
+                {/* Manual Color Pickers */}
+                <div>
+                    <label className="label" style={{ fontSize: '0.7rem' }}>BG Color</label>
+                    <input type="color" value={config.bgColor} onChange={e => handleChange('bgColor', e.target.value)} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     <div>
-                        <label className="label" style={{ fontSize: '0.75rem' }}>Background</label>
-                        <input
-                            type="color"
-                            value={config.bgColor}
-                            onChange={e => handleChange('bgColor', e.target.value)}
-                        />
+                        <label className="label" style={{ fontSize: '0.7rem' }}>Text</label>
+                        <input type="color" value={config.textColor} onChange={e => handleChange('textColor', e.target.value)} />
                     </div>
                     <div>
-                        <label className="label" style={{ fontSize: '0.75rem' }}>Text</label>
-                        <input
-                            type="color"
-                            value={config.textColor}
-                            onChange={e => handleChange('textColor', e.target.value)}
-                        />
+                        <label className="label" style={{ fontSize: '0.7rem' }}>Icon</label>
+                        <input type="color" value={config.iconColor} onChange={e => handleChange('iconColor', e.target.value)} />
                     </div>
-                    <div>
-                        <label className="label" style={{ fontSize: '0.75rem' }}>Icon</label>
-                        <input
-                            type="color"
-                            value={config.iconColor}
-                            onChange={e => handleChange('iconColor', e.target.value)}
-                        />
+                </div>
+
+                {/* Sizing — side by side */}
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                        <label className="label" style={{ marginBottom: 0 }}>Icon Size</label>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{config.iconSize}px</span>
                     </div>
+                    <input
+                        type="range" min="50" max="600"
+                        value={config.iconSize}
+                        onChange={e => handleChange('iconSize', Number(e.target.value))}
+                        style={{ width: '100%' }}
+                    />
+                </div>
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                        <label className="label" style={{ marginBottom: 0 }}>Text Size</label>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{config.fontSize}px</span>
+                    </div>
+                    <input
+                        type="range" min="20" max="250"
+                        value={config.fontSize}
+                        onChange={e => handleChange('fontSize', Number(e.target.value))}
+                        style={{ width: '100%' }}
+                    />
                 </div>
             </div>
 
-            <hr style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
-
-            {/* Sizing */}
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <label className="label" style={{ marginBottom: 0 }}>Icon Size</label>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{config.iconSize}px</span>
-                </div>
-                <input
-                    type="range"
-                    min="50" max="600"
-                    value={config.iconSize}
-                    onChange={e => handleChange('iconSize', Number(e.target.value))}
-                    style={{ width: '100%', marginBottom: '16px' }}
-                />
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <label className="label" style={{ marginBottom: 0 }}>Text Size</label>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{config.fontSize}px</span>
-                </div>
-                <input
-                    type="range"
-                    min="20" max="250"
-                    value={config.fontSize}
-                    onChange={e => handleChange('fontSize', Number(e.target.value))}
-                    style={{ width: '100%' }}
-                />
-            </div>
-
-            <hr style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+            <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: 0 }} />
 
             {/* Preview Toggle */}
-            <div>
-                <label className="label" style={{ marginBottom: '12px' }}>Preview Mode</label>
-                <div style={{ display: 'flex', gap: '12px', background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '12px' }}>
-                    <button
-                        className={`btn ${previewMode === 'square' ? '' : 'btn-secondary'}`}
-                        style={{ flex: 1, padding: '8px' }}
-                        onClick={() => setPreviewMode('square')}
-                    >
-                        Square
-                    </button>
-                    <button
-                        className={`btn ${previewMode === 'circle' ? '' : 'btn-secondary'}`}
-                        style={{ flex: 1, padding: '8px' }}
-                        onClick={() => setPreviewMode('circle')}
-                    >
-                        Circle (TikTok/Shopee)
-                    </button>
-                </div>
+            <div style={{ display: 'flex', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '10px' }}>
+                <button
+                    className={`btn ${previewMode === 'square' ? '' : 'btn-secondary'}`}
+                    style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }}
+                    onClick={() => setPreviewMode('square')}
+                >
+                    Square
+                </button>
+                <button
+                    className={`btn ${previewMode === 'circle' ? '' : 'btn-secondary'}`}
+                    style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }}
+                    onClick={() => setPreviewMode('circle')}
+                >
+                    Circle
+                </button>
             </div>
 
         </div>

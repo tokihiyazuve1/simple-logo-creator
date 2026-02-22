@@ -174,21 +174,37 @@ function App() {
 
   return (
     <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      gap: '64px',
-      padding: '40px',
-      flexWrap: 'wrap'
+      display: 'grid',
+      gridTemplateColumns: '1fr 480px',
+      height: '100vh',
+      overflow: 'hidden',
     }}>
-      <LogoPreview config={config} previewMode={previewMode} logoRef={logoRef} />
+      {/* Left — Preview */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '32px',
+      }}>
+        <LogoPreview config={config} previewMode={previewMode} logoRef={logoRef} />
+      </div>
 
-      <div style={{ width: '400px' }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '8px', fontWeight: 800 }}>Logo Creator</h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>
-          Instantly generate profile pictures for your TikTok or Shopee store.
-        </p>
+      {/* Right — Controls */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '24px 28px',
+        overflowY: 'auto',
+        gap: '12px',
+      }}>
+        <div>
+          <h1 style={{ fontSize: '1.6rem', marginBottom: '4px', fontWeight: 800 }}>Logo Creator</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0' }}>
+            Generate profile pictures for TikTok or Shopee.
+          </p>
+        </div>
         <ControlPanel
           config={config}
           setConfig={setConfig}
