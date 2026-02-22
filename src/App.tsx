@@ -57,23 +57,62 @@ function App() {
       <IconComponent size={iconSize} color={currentConfig.iconColor} strokeWidth={1.5} />
     );
 
-    const gap = 24;
-    const textY = isRow ? 400 + (fontSize * 0.35) : (isIconOnly ? 0 : 580);
-    const textX = isRow ? 440 - (gap / 2) : 400;
-    const iconY = isRow ? 400 - (iconSize / 2) : (isTextOnly ? 0 : 220);
-    const iconX = isRow ? 160 + (gap / 2) : (400 - (iconSize / 2));
-
     let content = '';
 
-    if (!isTextOnly) {
-      content += `<g transform="translate(${iconX}, ${iconY})">${iconMarkup.replace('<svg', `<svg width="${iconSize}" height="${iconSize}"`)}</g>`;
-    }
+    if (isRow) {
+      // Icon-left layout: icon on the left, text on the right
+      const iconX = 60;
+      const iconY = 400 - iconSize / 2;
+      const textX = iconX + iconSize + 24;
+      const textWidth = 800 - textX - 60;
 
-    if (!isIconOnly) {
-      content += `
-        <text x="${textX}" y="${textY}" font-family="${currentConfig.fontFamily}, sans-serif" 
-          font-size="${fontSize}px" font-weight="bold" fill="${currentConfig.textColor}" 
-          text-anchor="${isRow ? 'start' : 'middle'}">${currentConfig.name}</text>`;
+      if (!isTextOnly) {
+        content += `<g transform="translate(${iconX}, ${iconY})">${iconMarkup.replace('<svg', `<svg width="${iconSize}" height="${iconSize}"`)}</g>`;
+      }
+      if (!isIconOnly) {
+        content += `
+          <foreignObject x="${textX}" y="0" width="${textWidth}" height="800">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="
+              display: flex; align-items: center; height: 100%;
+              color: ${currentConfig.textColor};
+              font-family: '${currentConfig.fontFamily}', sans-serif;
+              font-size: ${fontSize}px;
+              font-weight: 700;
+              line-height: 1.1;
+              word-break: break-word;
+            ">${currentConfig.name}</div>
+          </foreignObject>`;
+      }
+    } else {
+      // Icon-top / icon-only / text-only: vertically stacked, centered
+      const gap = 40;
+      const padding = 60;
+
+      if (!isTextOnly) {
+        const iconX = 400 - iconSize / 2;
+        // Position icon in the upper portion
+        const iconY = isIconOnly ? (400 - iconSize / 2) : (padding + 40);
+        content += `<g transform="translate(${iconX}, ${iconY})">${iconMarkup.replace('<svg', `<svg width="${iconSize}" height="${iconSize}"`)}</g>`;
+      }
+
+      if (!isIconOnly) {
+        // Position text below icon using foreignObject for wrapping
+        const textTop = isTextOnly ? 0 : (padding + 40 + iconSize + gap);
+        const textHeight = 800 - textTop - padding;
+        content += `
+          <foreignObject x="${padding}" y="${textTop}" width="${800 - padding * 2}" height="${textHeight}">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="
+              ${isTextOnly ? 'display: flex; align-items: center; height: 100%;' : ''}
+              color: ${currentConfig.textColor};
+              font-family: '${currentConfig.fontFamily}', sans-serif;
+              font-size: ${fontSize}px;
+              font-weight: 700;
+              text-align: center;
+              line-height: 1.1;
+              word-break: break-word;
+            ">${currentConfig.name}</div>
+          </foreignObject>`;
+      }
     }
 
     const clipDef = shape === 'circle'
@@ -82,7 +121,7 @@ function App() {
     const clipAttr = shape === 'circle' ? ' clip-path="url(#circleClip)"' : '';
 
     return `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" viewBox="0 0 800 800" width="800" height="800">
         ${clipDef}
         <g${clipAttr}>
           <rect width="800" height="800" fill="${currentConfig.bgColor === 'transparent' ? 'none' : currentConfig.bgColor}" />
@@ -92,44 +131,67 @@ function App() {
     `.trim();
   };
 
+  /**
+   * Create an offscreen clone of the logo element at full 800x800 size,
+   * outside any CSS transform, so html2canvas captures it accurately.
+   */
+  const captureOffscreen = async (
+    targetConfig: LogoConfig,
+    isTransparent: boolean
+  ): Promise<HTMLCanvasElement | null> => {
+    if (!logoRef.current) return null;
+
+    // Clone the visible logo element
+    const clone = logoRef.current.cloneNode(true) as HTMLElement;
+
+    // Override styles for the target variation
+    clone.style.width = '800px';
+    clone.style.height = '800px';
+    clone.style.position = 'fixed';
+    clone.style.left = '-9999px';
+    clone.style.top = '0';
+    clone.style.transform = 'none';
+    clone.style.backgroundColor = isTransparent ? 'transparent' : targetConfig.bgColor;
+
+    // Override text & icon colors for monochrome variations
+    if (targetConfig.textColor !== config.textColor) {
+      const textNode = clone.querySelector('div > div') as HTMLElement;
+      if (textNode) textNode.style.color = targetConfig.textColor;
+    }
+    // Override SVG icon color
+    const svgEl = clone.querySelector('svg') as SVGElement;
+    if (svgEl && targetConfig.iconColor !== config.iconColor) {
+      svgEl.style.color = targetConfig.iconColor;
+      svgEl.querySelectorAll('[stroke]').forEach(el => {
+        el.setAttribute('stroke', targetConfig.iconColor);
+      });
+    }
+
+    document.body.appendChild(clone);
+    await new Promise(r => setTimeout(r, 100)); // Let browser paint
+
+    const canvas = await html2canvas(clone, {
+      backgroundColor: isTransparent ? null : targetConfig.bgColor,
+      scale: 2,
+      logging: false,
+      width: 800,
+      height: 800,
+    });
+
+    document.body.removeChild(clone);
+    return canvas;
+  };
+
   const generateVariation = async (
     targetConfig: LogoConfig,
-    forcedRef: React.RefObject<HTMLDivElement | null>,
     isTransparent: boolean,
     shape: 'square' | 'circle'
   ): Promise<{ pngBlob: Blob | null, svgString: string }> => {
 
-    if (!forcedRef.current) return { pngBlob: null, svgString: '' };
-
-    const el = forcedRef.current;
-    const originalBg = el.style.backgroundColor;
-
     const svgString = generateSvgString(targetConfig, shape);
 
-    el.style.backgroundColor = isTransparent ? 'transparent' : targetConfig.bgColor;
-
-    if (targetConfig.textColor !== config.textColor) {
-      const textNode = Array.from(el.children).find(c => c.tagName === 'DIV') as HTMLElement;
-      if (textNode) textNode.style.color = targetConfig.textColor;
-      const svgNode = Array.from(el.children).find(c => c.tagName === 'svg') as HTMLElement;
-      if (svgNode) svgNode.style.color = targetConfig.iconColor;
-    }
-
-    await new Promise(r => setTimeout(r, 50));
-
-    const captured = await html2canvas(el, {
-      backgroundColor: isTransparent ? null : targetConfig.bgColor,
-      scale: 2,
-      logging: false,
-    });
-
-    el.style.backgroundColor = originalBg;
-    if (targetConfig.textColor !== config.textColor) {
-      const textNode = Array.from(el.children).find(c => c.tagName === 'DIV') as HTMLElement;
-      if (textNode) textNode.style.color = config.textColor;
-      const svgNode = Array.from(el.children).find(c => c.tagName === 'svg') as HTMLElement;
-      if (svgNode) svgNode.style.color = config.iconColor;
-    }
+    const captured = await captureOffscreen(targetConfig, isTransparent);
+    if (!captured) return { pngBlob: null, svgString };
 
     // Apply circular mask if circle mode
     let finalCanvas = captured;
@@ -170,7 +232,7 @@ function App() {
       const shapeSuffix = previewMode === 'circle' ? '_Circle' : '';
 
       for (const v of variations) {
-        const { pngBlob, svgString } = await generateVariation(v.cfg, logoRef, v.trans, previewMode);
+        const { pngBlob, svgString } = await generateVariation(v.cfg, v.trans, previewMode);
         if (pngBlob) zip.file(`${prefix}_${v.name}${shapeSuffix}.png`, pngBlob);
         zip.file(`${prefix}_${v.name}${shapeSuffix}.svg`, svgString);
       }
