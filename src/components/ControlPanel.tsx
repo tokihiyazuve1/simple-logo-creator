@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FONTS, ICONS, PALETTES } from '../types';
 import type { LogoConfig } from '../types';
-import { RefreshCw, Download } from 'lucide-react';
+import { RefreshCw, Download, ChevronDown } from 'lucide-react';
 
 interface Props {
     config: LogoConfig;
@@ -13,12 +13,26 @@ interface Props {
     isDownloading: boolean;
 }
 
+const PaletteSwatch: React.FC<{ bg: string; text: string; icon: string }> = ({ bg, text, icon }) => (
+    <div style={{
+        display: 'flex', width: '36px', height: '18px', borderRadius: '4px',
+        overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)', flexShrink: 0
+    }}>
+        <div style={{ flex: 1, backgroundColor: bg }} />
+        <div style={{ flex: 1, backgroundColor: text }} />
+        <div style={{ flex: 1, backgroundColor: icon }} />
+    </div>
+);
+
 export const ControlPanel: React.FC<Props> = ({
     config, setConfig, previewMode, setPreviewMode, onSuggest, onDownload, isDownloading
 }) => {
     const handleChange = (key: keyof LogoConfig, value: string | number) => {
         setConfig(prev => ({ ...prev, [key]: value }));
     };
+
+    const [paletteOpen, setPaletteOpen] = useState(false);
+    const activePalette = PALETTES.find(p => p.bg === config.bgColor && p.text === config.textColor && p.icon === config.iconColor);
 
     return (
         <div className="panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -96,22 +110,63 @@ export const ControlPanel: React.FC<Props> = ({
             {/* Colors */}
             <div>
                 <label className="label">Color Palette Theme</label>
-                <select
-                    className="input-field"
-                    style={{ marginBottom: '16px' }}
-                    onChange={e => {
-                        const p = PALETTES.find(pal => pal.name === e.target.value);
-                        if (p) {
-                            setConfig(prev => ({ ...prev, bgColor: p.bg, textColor: p.text, iconColor: p.icon }));
-                        }
-                    }}
-                    value={PALETTES.find(p => p.bg === config.bgColor && p.text === config.textColor && p.icon === config.iconColor)?.name || 'Custom'}
-                >
-                    <option value="Custom">Custom...</option>
-                    {PALETTES.map(p => (
-                        <option key={p.name} value={p.name}>{p.name}</option>
-                    ))}
-                </select>
+
+                {/* Custom Dropdown with Color Previews */}
+                <div style={{ position: 'relative', marginBottom: '16px' }}>
+                    <button
+                        type="button"
+                        className="input-field"
+                        onClick={() => setPaletteOpen(!paletteOpen)}
+                        style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            cursor: 'pointer', textAlign: 'left', width: '100%',
+                        }}
+                    >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {activePalette ? (
+                                <>
+                                    <PaletteSwatch bg={activePalette.bg} text={activePalette.text} icon={activePalette.icon} />
+                                    {activePalette.name}
+                                </>
+                            ) : (
+                                'Custom...'
+                            )}
+                        </span>
+                        <ChevronDown size={14} style={{ opacity: 0.5, transform: paletteOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                    </button>
+
+                    {paletteOpen && (
+                        <div style={{
+                            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                            marginTop: '4px', maxHeight: '240px', overflowY: 'auto',
+                            background: 'rgba(15, 23, 42, 0.98)', border: '1px solid var(--border)',
+                            borderRadius: '8px', boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+                        }}>
+                            {PALETTES.map(p => (
+                                <button
+                                    key={p.name}
+                                    type="button"
+                                    onClick={() => {
+                                        setConfig(prev => ({ ...prev, bgColor: p.bg, textColor: p.text, iconColor: p.icon }));
+                                        setPaletteOpen(false);
+                                    }}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '10px',
+                                        width: '100%', padding: '8px 12px',
+                                        background: activePalette?.name === p.name ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                                        border: 'none', color: 'white', cursor: 'pointer',
+                                        fontSize: '0.9rem', textAlign: 'left',
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
+                                    onMouseLeave={e => (e.currentTarget.style.background = activePalette?.name === p.name ? 'rgba(59, 130, 246, 0.15)' : 'transparent')}
+                                >
+                                    <PaletteSwatch bg={p.bg} text={p.text} icon={p.icon} />
+                                    <span>{p.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 {/* Manual Pickers */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
