@@ -43,7 +43,7 @@ function App() {
     }));
   };
 
-  const generateSvgString = (currentConfig: LogoConfig) => {
+  const generateSvgString = (currentConfig: LogoConfig, shape: 'square' | 'circle') => {
     const IconComponent = ICON_MAP[currentConfig.icon] || ICON_MAP['ShoppingBag'];
 
     const isIconOnly = currentConfig.layout === 'icon-only';
@@ -53,15 +53,11 @@ function App() {
     const iconSize = currentConfig.iconSize;
     const fontSize = currentConfig.fontSize;
 
-    // Render the Lucide icon to an SVG string
     const iconMarkup = renderToStaticMarkup(
       <IconComponent size={iconSize} color={currentConfig.iconColor} strokeWidth={1.5} />
     );
 
-    // SVG coordinates must match the React DOM layout closely
-    // 800 center is 400.
     const gap = 24;
-
     const textY = isRow ? 400 + (fontSize * 0.35) : (isIconOnly ? 0 : 580);
     const textX = isRow ? 440 - (gap / 2) : 400;
     const iconY = isRow ? 400 - (iconSize / 2) : (isTextOnly ? 0 : 220);
@@ -70,30 +66,28 @@ function App() {
     let content = '';
 
     if (!isTextOnly) {
-      content += `<g transform="translate(${iconX}, ${iconY})">${iconMarkup.replace('<svg', `<svg width="${iconSize}" height="${iconSize}"`)
-        }</g>`;
+      content += `<g transform="translate(${iconX}, ${iconY})">${iconMarkup.replace('<svg', `<svg width="${iconSize}" height="${iconSize}"`)}</g>`;
     }
 
     if (!isIconOnly) {
       content += `
-        <text 
-          x="${textX}" 
-          y="${textY}" 
-          font-family="${currentConfig.fontFamily}, sans-serif" 
-          font-size="${fontSize}px" 
-          font-weight="bold" 
-          fill="${currentConfig.textColor}" 
-          text-anchor="${isRow ? 'start' : 'middle'}"
-        >
-          ${currentConfig.name}
-        </text>
-      `;
+        <text x="${textX}" y="${textY}" font-family="${currentConfig.fontFamily}, sans-serif" 
+          font-size="${fontSize}px" font-weight="bold" fill="${currentConfig.textColor}" 
+          text-anchor="${isRow ? 'start' : 'middle'}">${currentConfig.name}</text>`;
     }
+
+    const clipDef = shape === 'circle'
+      ? `<defs><clipPath id="circleClip"><circle cx="400" cy="400" r="400"/></clipPath></defs>`
+      : '';
+    const clipAttr = shape === 'circle' ? ' clip-path="url(#circleClip)"' : '';
 
     return `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
-        <rect width="800" height="800" fill="${currentConfig.bgColor === 'transparent' ? 'none' : currentConfig.bgColor}" />
-        ${content}
+        ${clipDef}
+        <g${clipAttr}>
+          <rect width="800" height="800" fill="${currentConfig.bgColor === 'transparent' ? 'none' : currentConfig.bgColor}" />
+          ${content}
+        </g>
       </svg>
     `.trim();
   };
@@ -101,7 +95,8 @@ function App() {
   const generateVariation = async (
     targetConfig: LogoConfig,
     forcedRef: React.RefObject<HTMLDivElement | null>,
-    isTransparent: boolean
+    isTransparent: boolean,
+    shape: 'square' | 'circle'
   ): Promise<{ pngBlob: Blob | null, svgString: string }> => {
 
     if (!forcedRef.current) return { pngBlob: null, svgString: '' };
@@ -109,21 +104,20 @@ function App() {
     const el = forcedRef.current;
     const originalBg = el.style.backgroundColor;
 
-    const svgString = generateSvgString(targetConfig);
+    const svgString = generateSvgString(targetConfig, shape);
 
     el.style.backgroundColor = isTransparent ? 'transparent' : targetConfig.bgColor;
 
     if (targetConfig.textColor !== config.textColor) {
       const textNode = Array.from(el.children).find(c => c.tagName === 'DIV') as HTMLElement;
       if (textNode) textNode.style.color = targetConfig.textColor;
-
       const svgNode = Array.from(el.children).find(c => c.tagName === 'svg') as HTMLElement;
       if (svgNode) svgNode.style.color = targetConfig.iconColor;
     }
 
     await new Promise(r => setTimeout(r, 50));
 
-    const canvas = await html2canvas(el, {
+    const captured = await html2canvas(el, {
       backgroundColor: isTransparent ? null : targetConfig.bgColor,
       scale: 2,
       logging: false,
@@ -137,8 +131,24 @@ function App() {
       if (svgNode) svgNode.style.color = config.iconColor;
     }
 
+    // Apply circular mask if circle mode
+    let finalCanvas = captured;
+    if (shape === 'circle') {
+      const size = captured.width;
+      const circCanvas = document.createElement('canvas');
+      circCanvas.width = size;
+      circCanvas.height = size;
+      const ctx = circCanvas.getContext('2d')!;
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(captured, 0, 0);
+      finalCanvas = circCanvas;
+    }
+
     return new Promise(resolve => {
-      canvas.toBlob(blob => resolve({ pngBlob: blob, svgString }), 'image/png');
+      finalCanvas.toBlob(blob => resolve({ pngBlob: blob, svgString }), 'image/png');
     });
   };
 
@@ -156,10 +166,13 @@ function App() {
         { name: 'White', cfg: { ...config, bgColor: 'transparent', textColor: '#ffffff', iconColor: '#ffffff' }, trans: true },
       ];
 
+      const prefix = config.name.replace(/\s+/g, '_');
+      const shapeSuffix = previewMode === 'circle' ? '_Circle' : '';
+
       for (const v of variations) {
-        const { pngBlob, svgString } = await generateVariation(v.cfg, logoRef, v.trans);
-        if (pngBlob) zip.file(`${config.name.replace(/\s+/g, '_')}_${v.name}.png`, pngBlob);
-        zip.file(`${config.name.replace(/\s+/g, '_')}_${v.name}.svg`, svgString);
+        const { pngBlob, svgString } = await generateVariation(v.cfg, logoRef, v.trans, previewMode);
+        if (pngBlob) zip.file(`${prefix}_${v.name}${shapeSuffix}.png`, pngBlob);
+        zip.file(`${prefix}_${v.name}${shapeSuffix}.svg`, svgString);
       }
 
       const content = await zip.generateAsync({ type: 'blob' });
