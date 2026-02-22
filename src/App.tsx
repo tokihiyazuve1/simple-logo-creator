@@ -238,7 +238,7 @@ function App() {
       }
 
       const content = await zip.generateAsync({ type: 'blob' });
-      saveAs(content, `${config.name.replace(/\s+/g, '_')}_Logos.zip`);
+      saveAs(content, `${config.name.replace(/\s+/g, '_')}_Logos_${previewMode === 'circle' ? 'Circle' : 'Square'}.zip`);
     } catch (e) {
       console.error('Export failed', e);
       alert('Failed to generate export bundle.');
