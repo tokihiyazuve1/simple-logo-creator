@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-export type LogoStyle = 'clean' | 'neo-brutal' | 'outlined' | 'shadow-pop' | 'sticker' | 'glow';
+export type LogoStyle = 'clean' | 'neo-brutal' | 'outlined' | 'shadow-pop' | 'sticker' | 'glow'
+  | 'emboss' | 'retro' | 'neon' | '3d-extrude' | 'long-shadow' | 'double-stroke' | 'vintage';
 
 export interface LogoConfig {
   name: string;
@@ -37,6 +38,13 @@ export const LOGO_STYLES: { value: LogoStyle; label: string; desc: string }[] = 
   { value: 'shadow-pop', label: 'Shadow Pop', desc: 'Chunky colored offset shadow' },
   { value: 'sticker', label: 'Sticker', desc: 'Thick white border cutout' },
   { value: 'glow', label: 'Glow', desc: 'Soft colored halo' },
+  { value: 'emboss', label: 'Emboss', desc: 'Raised 3D highlight effect' },
+  { value: 'retro', label: 'Retro', desc: 'Layered warm-toned shadows' },
+  { value: 'neon', label: 'Neon', desc: 'Bright neon sign buzz' },
+  { value: '3d-extrude', label: '3D Extrude', desc: 'Solid block depth effect' },
+  { value: 'long-shadow', label: 'Long Shadow', desc: 'Dramatic diagonal shadow' },
+  { value: 'double-stroke', label: 'Double Stroke', desc: 'Two-color concentric outlines' },
+  { value: 'vintage', label: 'Vintage', desc: 'Warm aged sepia tone' },
 ];
 
 export const FONTS = [

@@ -70,6 +70,90 @@ function getStyleEffects(config: LogoConfig): { text: CSSProperties; icon: CSSPr
                     filter: `drop-shadow(0 0 12px ${t}) drop-shadow(0 0 24px ${t})`,
                 },
             };
+        case 'emboss':
+            return {
+                text: {
+                    textShadow: `-2px -2px 0px rgba(255,255,255,0.4), 2px 2px 4px rgba(0,0,0,0.5)`,
+                },
+                icon: {
+                    filter: 'drop-shadow(-2px -2px 0px rgba(255,255,255,0.4)) drop-shadow(2px 2px 3px rgba(0,0,0,0.5))',
+                },
+            };
+        case 'retro': {
+            // Layered warm-toned shadows in retro palette
+            return {
+                text: {
+                    textShadow: `3px 3px 0px #e8985a, 6px 6px 0px #c75d3a, 9px 9px 0px #8b3a2a`,
+                },
+                icon: {
+                    filter: 'drop-shadow(3px 3px 0px #e8985a) drop-shadow(3px 3px 0px #c75d3a) drop-shadow(3px 3px 0px #8b3a2a)',
+                },
+            };
+        }
+        case 'neon': {
+            // Intense neon sign — sharper inner, wider outer glow
+            return {
+                text: {
+                    textShadow: `0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fff, 0 0 42px ${c}, 0 0 82px ${c}, 0 0 92px ${c}`,
+                    color: '#ffffff',
+                },
+                icon: {
+                    filter: `brightness(1.5) drop-shadow(0 0 7px ${t}) drop-shadow(0 0 20px ${t}) drop-shadow(0 0 40px ${t})`,
+                },
+            };
+        }
+        case '3d-extrude': {
+            // Generate many 1px offset shadows to create solid 3D block
+            const layers = 12;
+            const textShadows = Array.from({ length: layers }, (_, i) =>
+                `${i + 1}px ${i + 1}px 0px rgba(0,0,0,${0.6 - i * 0.03})`
+            ).join(', ');
+            return {
+                text: { textShadow: textShadows },
+                icon: {
+                    filter: Array.from({ length: 4 }, (_, i) =>
+                        `drop-shadow(${(i + 1) * 3}px ${(i + 1) * 3}px 0px rgba(0,0,0,${0.5 - i * 0.1}))`
+                    ).join(' '),
+                },
+            };
+        }
+        case 'long-shadow': {
+            // Dramatic diagonal shadow stretching far
+            const longShadows = Array.from({ length: 30 }, (_, i) =>
+                `${i + 1}px ${i + 1}px 0px rgba(0,0,0,${0.3 - i * 0.01})`
+            ).join(', ');
+            return {
+                text: { textShadow: longShadows },
+                icon: {
+                    filter: Array.from({ length: 6 }, (_, i) =>
+                        `drop-shadow(${(i + 1) * 4}px ${(i + 1) * 4}px 0px rgba(0,0,0,${0.25 - i * 0.04}))`
+                    ).join(' '),
+                },
+            };
+        }
+        case 'double-stroke':
+            return {
+                text: {
+                    WebkitTextStroke: `2px ${c}`,
+                    paintOrder: 'stroke fill',
+                    textShadow: `0 0 0 ${t}, 3px 3px 0px ${c}`,
+                },
+                icon: {
+                    filter: `drop-shadow(0 0 0px ${t}) drop-shadow(2px 2px 0px ${c})`,
+                    strokeWidth: 2.5,
+                },
+            };
+        case 'vintage':
+            return {
+                text: {
+                    textShadow: `2px 2px 0px rgba(139,90,43,0.5), -1px -1px 0px rgba(210,180,140,0.3)`,
+                    opacity: 0.9,
+                },
+                icon: {
+                    filter: 'sepia(0.5) saturate(0.8) drop-shadow(2px 2px 0px rgba(139,90,43,0.4))',
+                    opacity: 0.9,
+                },
+            };
         case 'clean':
         default:
             return { text: {}, icon: {} };
