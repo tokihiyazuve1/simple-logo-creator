@@ -18,6 +18,15 @@ import type { LucideIcon } from 'lucide-react';
 export type LogoStyle = 'clean' | 'neo-brutal' | 'outlined' | 'shadow-pop' | 'sticker' | 'glow'
   | 'emboss' | 'retro' | 'neon' | '3d-extrude' | 'long-shadow' | 'double-stroke' | 'vintage';
 
+export type BgPattern = 'none' | 'dots' | 'diagonal-stripes' | 'horizontal-stripes' | 'grid'
+  | 'checkerboard' | 'cross-hatch' | 'polka' | 'diamond-grid' | 'zigzag';
+
+export type TextCase = 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+export type LetterSpacing = 'tight' | 'normal' | 'wide' | 'ultra-wide';
+
+export type BadgeShape = 'none' | 'circle' | 'rounded-square' | 'hexagon' | 'shield'
+  | 'diamond' | 'oval' | 'octagon' | 'star' | 'ribbon';
+
 export interface LogoConfig {
   name: string;
   fontFamily: string;
@@ -29,6 +38,10 @@ export interface LogoConfig {
   fontSize: number;
   iconSize: number;
   logoStyle: LogoStyle;
+  bgPattern: BgPattern;
+  textCase: TextCase;
+  letterSpacing: LetterSpacing;
+  badgeShape: BadgeShape;
 }
 
 export const LOGO_STYLES: { value: LogoStyle; label: string; desc: string }[] = [
@@ -45,6 +58,46 @@ export const LOGO_STYLES: { value: LogoStyle; label: string; desc: string }[] = 
   { value: 'long-shadow', label: 'Long Shadow', desc: 'Dramatic diagonal shadow' },
   { value: 'double-stroke', label: 'Double Stroke', desc: 'Two-color concentric outlines' },
   { value: 'vintage', label: 'Vintage', desc: 'Warm aged sepia tone' },
+];
+
+export const BG_PATTERNS: { value: BgPattern; label: string }[] = [
+  { value: 'none', label: 'Solid' },
+  { value: 'dots', label: 'Dots' },
+  { value: 'polka', label: 'Polka Dots' },
+  { value: 'diagonal-stripes', label: 'Diagonal Stripes' },
+  { value: 'horizontal-stripes', label: 'Horizontal Stripes' },
+  { value: 'grid', label: 'Grid' },
+  { value: 'checkerboard', label: 'Checkerboard' },
+  { value: 'cross-hatch', label: 'Cross Hatch' },
+  { value: 'diamond-grid', label: 'Diamond Grid' },
+  { value: 'zigzag', label: 'Zigzag' },
+];
+
+export const TEXT_CASES: { value: TextCase; label: string }[] = [
+  { value: 'none', label: 'As Typed' },
+  { value: 'uppercase', label: 'UPPERCASE' },
+  { value: 'lowercase', label: 'lowercase' },
+  { value: 'capitalize', label: 'Capitalize' },
+];
+
+export const LETTER_SPACINGS: { value: LetterSpacing; label: string }[] = [
+  { value: 'tight', label: 'Tight' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'wide', label: 'Wide' },
+  { value: 'ultra-wide', label: 'Ultra Wide' },
+];
+
+export const BADGE_SHAPES: { value: BadgeShape; label: string }[] = [
+  { value: 'none', label: 'No Badge' },
+  { value: 'circle', label: 'Circle' },
+  { value: 'rounded-square', label: 'Rounded Square' },
+  { value: 'hexagon', label: 'Hexagon' },
+  { value: 'shield', label: 'Shield' },
+  { value: 'diamond', label: 'Diamond' },
+  { value: 'oval', label: 'Oval' },
+  { value: 'octagon', label: 'Octagon' },
+  { value: 'star', label: 'Star' },
+  { value: 'ribbon', label: 'Ribbon' },
 ];
 
 export const FONTS = [

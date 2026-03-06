@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FONTS, ICONS, PALETTES, ICON_MAP, LOGO_STYLES } from '../types';
+import { FONTS, ICONS, PALETTES, ICON_MAP, LOGO_STYLES, BG_PATTERNS, TEXT_CASES, LETTER_SPACINGS, BADGE_SHAPES } from '../types';
 import type { LogoConfig } from '../types';
 import { RefreshCw, Download, ChevronDown } from 'lucide-react';
 
@@ -233,6 +233,38 @@ export const ControlPanel: React.FC<Props> = ({
                         <label className="label" style={{ fontSize: '0.7rem' }}>Icon</label>
                         <input type="color" value={config.iconColor} onChange={e => handleChange('iconColor', e.target.value)} />
                     </div>
+                </div>
+
+                {/* Background Pattern */}
+                <div>
+                    <label className="label">Pattern</label>
+                    <select className="input-field" value={config.bgPattern} onChange={e => handleChange('bgPattern', e.target.value)}>
+                        {BG_PATTERNS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                    </select>
+                </div>
+
+                {/* Badge Shape */}
+                <div>
+                    <label className="label">Badge</label>
+                    <select className="input-field" value={config.badgeShape} onChange={e => handleChange('badgeShape', e.target.value)}>
+                        {BADGE_SHAPES.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
+                    </select>
+                </div>
+
+                {/* Text Case */}
+                <div>
+                    <label className="label">Text Case</label>
+                    <select className="input-field" value={config.textCase} onChange={e => handleChange('textCase', e.target.value)}>
+                        {TEXT_CASES.map(tc => <option key={tc.value} value={tc.value}>{tc.label}</option>)}
+                    </select>
+                </div>
+
+                {/* Letter Spacing */}
+                <div>
+                    <label className="label">Spacing</label>
+                    <select className="input-field" value={config.letterSpacing} onChange={e => handleChange('letterSpacing', e.target.value)}>
+                        {LETTER_SPACINGS.map(ls => <option key={ls.value} value={ls.value}>{ls.label}</option>)}
+                    </select>
                 </div>
 
                 {/* Sizing — side by side */}

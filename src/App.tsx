@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import { LogoPreview } from './components/LogoPreview';
 import { ControlPanel } from './components/ControlPanel';
-import { PALETTES, FONTS, ICONS, ICON_MAP, LOGO_STYLES } from './types';
+import { PALETTES, FONTS, ICONS, ICON_MAP, LOGO_STYLES, BG_PATTERNS, TEXT_CASES, LETTER_SPACINGS, BADGE_SHAPES } from './types';
 import type { LogoConfig } from './types';
 
 import './index.css';
@@ -23,6 +23,10 @@ function App() {
     iconSize: 200,
     fontSize: 100,
     logoStyle: 'clean',
+    bgPattern: 'none',
+    textCase: 'none',
+    letterSpacing: 'normal',
+    badgeShape: 'none',
   });
 
   const [previewMode, setPreviewMode] = useState<'circle' | 'square'>('square');
@@ -35,6 +39,10 @@ function App() {
     const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
 
     const randomStyle = LOGO_STYLES[Math.floor(Math.random() * LOGO_STYLES.length)];
+    const randomPattern = BG_PATTERNS[Math.floor(Math.random() * BG_PATTERNS.length)];
+    const randomCase = TEXT_CASES[Math.floor(Math.random() * TEXT_CASES.length)];
+    const randomSpacing = LETTER_SPACINGS[Math.floor(Math.random() * LETTER_SPACINGS.length)];
+    const randomBadge = BADGE_SHAPES[Math.floor(Math.random() * BADGE_SHAPES.length)];
 
     setConfig(prev => ({
       ...prev,
@@ -44,6 +52,10 @@ function App() {
       fontFamily: randomFont,
       icon: randomIcon,
       logoStyle: randomStyle.value,
+      bgPattern: randomPattern.value,
+      textCase: randomCase.value,
+      letterSpacing: randomSpacing.value,
+      badgeShape: randomBadge.value,
     }));
   };
 
