@@ -62,3 +62,99 @@
 - Consider edge cases and exceptions
 - Treat every pushback from the user as a signal to look deeper
 - When a problem is complex, think it through fully before writing your response
+
+## Coding Discipline
+
+### Single Source of Truth
+- NEVER hardcode values that already exist in a constant, config object, or variable — always reference the original
+- If a value is used in more than one place, extract it to a shared constant and reference it everywhere
+- When updating a value, it should only need to change in ONE place
+
+### Never Do This
+- Do not copy-paste selectors, URLs, config values, or magic strings into multiple locations
+- Do not create local duplicates of existing objects (e.g., duplicating a selector map inside a function when a shared `SEL` object already exists)
+- Do not hardcode a value inline when a named constant would make the code clearer and safer
+
+### Why This Matters
+- When external dependencies change (e.g., Shopee updates their CSS classes), a hardcoded duplicate will silently break while the original gets updated
+- This is the #1 source of bugs in this project — stale selectors in one function while another has the correct value
+
+---
+
+## Code Safety
+
+### Deletion Discipline
+- When removing any function, variable, class, or module, **search the entire codebase** for all references to it before committing. Every call site, import, and reference must be removed or updated together. Partial deletions cause runtime crashes.
+
+### Exhaustive State Handling
+- When writing conditional logic that handles multiple known states or cases, explicitly handle **every** known case. Never rely on a generic `else` fallback that silently produces wrong output. If an unknown state appears, log a warning rather than guessing a value.
+
+### File Integrity
+- When creating or converting files, ensure the actual file format matches its extension. Renaming a file does not change its format.
+- When copying directories, verify the resulting structure is correct — no accidental nesting or duplication.
+
+### Unique Identifiers
+- All HTML `id` attributes must be unique within the page. Before adding a new ID, verify it doesn't already exist elsewhere in the file.
+
+### Protected Data
+- Before writing to any spreadsheet column or database field, check project documentation for protected ranges, formulas, or locked cells. Never overwrite cells that contain formulas unless explicitly instructed.
+
+### File Synchronization
+- When a project maintains multiple copies of the same file (e.g., browser-specific builds), every edit must be propagated to all copies in the same commit. Stale copies cause silent divergence and hard-to-trace bugs.
+
+### No Unauthorized Side Effects
+- Never run `git push`, create releases, deploy, or perform any irreversible external action without asking the user first. Commit locally and confirm before pushing.
+
+---
+
+## Type Safety and Data Integrity
+
+### Parse Input Types Explicitly
+- HTML inputs always return strings via `e.target.value`. Never pass raw string values to handlers or state that expects numbers. Always parse explicitly: `Number(e.target.value)` for numeric fields. Type your handler signatures to reflect what they actually accept (`string | number`), and let TypeScript catch mismatches.
+
+### Batch Related State Updates
+- Never call `setState` multiple times in sequence for related fields. If you're updating bgColor, textColor, and iconColor from the same action, batch them into one `setConfig(prev => ({ ...prev, ...allChanges }))`. Each individual `setState` triggers a separate re-render cycle.
+
+---
+
+## UI Replacement Discipline
+
+### Delete Before You Add
+- When replacing a UI component (e.g., swapping a select dropdown for a custom one), delete the old component **completely** before or alongside adding the new one. Never leave old UI "for reference" — it renders alongside the replacement and confuses users.
+
+---
+
+## Canvas and Export Integrity
+
+### Never Capture Inside CSS Transforms
+- Never use `html2canvas` (or similar screenshot tools) on an element inside a CSS `transform` (especially `scale`). Transforms corrupt layout calculations. Always clone the target element to an offscreen container at its natural size: `position: fixed; left: -9999px; transform: none`, then capture the clone.
+
+### SVG Text Must Use foreignObject for Wrapping
+- SVG `<text>` elements do not support word wrapping. If text might exceed the container width, use `<foreignObject>` with an inner HTML `<div>` to get CSS `word-break`, `text-align`, and line wrapping. This is the only reliable way to render multi-line text in SVGs.
+
+### Export Must Mirror Preview
+- If an app has a "what you see" preview and a "what you get" export, they must use the same rendering path. Test every export format (PNG, SVG) against the live preview after every layout change. If the preview uses CSS flexbox, don't hand-code static coordinates for the export — capture the actual DOM or use the same CSS in a `<foreignObject>`.
+
+---
+
+## Bundle and Import Hygiene
+
+### Tree-Shake Large Libraries
+- Never use `import * as X` from large icon or component libraries. Wildcard imports pull the entire library into the production bundle. Instead, import only what you use: `import { Heart, Star } from 'lucide-react'` and create an explicit lookup map if needed.
+
+### Delete Scaffolding Immediately
+- After scaffolding a project with Vite, CRA, or Next.js, immediately delete all boilerplate CSS, placeholder SVGs, and template files (`App.css`, `logo.svg`, etc.) before writing real code. They add dead weight and clutter.
+
+---
+
+## Metadata and SEO
+
+### Set Real Metadata From Day One
+- Never ship placeholder names. Set `package.json` name, `<title>`, `<meta description>`, and favicon to real values before the first commit. "temp-app" should never appear in a deployed product.
+
+---
+
+## Stylesheet Discipline
+
+### Static Styles Belong in CSS Files
+- Do not put `<style>` tags inside React component return statements. They get recreated on every render. Move static rules to `.css` files. Inline `style={}` props are acceptable for truly dynamic values, but static visual rules belong in stylesheets.

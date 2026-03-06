@@ -15,8 +15,8 @@ interface Props {
 
 const PaletteSwatch: React.FC<{ bg: string; text: string; icon: string }> = ({ bg, text, icon }) => (
     <div style={{
-        display: 'flex', width: '36px', height: '18px', borderRadius: '4px',
-        overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)', flexShrink: 0
+        display: 'flex', width: '36px', height: '18px', borderRadius: '0',
+        overflow: 'hidden', border: '2px solid #1a1a1a', flexShrink: 0
     }}>
         <div style={{ flex: 1, backgroundColor: bg }} />
         <div style={{ flex: 1, backgroundColor: text }} />
@@ -52,15 +52,15 @@ function CustomDropdown<T extends { label: string; value: string }>({
                 <span style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
                     {active ? renderItem(active, true) : 'Select...'}
                 </span>
-                <ChevronDown size={14} style={{ opacity: 0.5, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+                <ChevronDown size={14} style={{ opacity: 0.6, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }} />
             </button>
 
             {open && (
                 <div style={{
                     position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
                     marginTop: '4px', maxHeight: '220px', overflowY: 'auto',
-                    background: 'rgba(15, 23, 42, 0.98)', border: '1px solid var(--border)',
-                    borderRadius: '8px', boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+                    background: '#ffffff', border: '3px solid #1a1a1a',
+                    borderRadius: '6px', boxShadow: '5px 5px 0px #1a1a1a',
                 }}>
                     {items.map(item => (
                         <button
@@ -70,12 +70,14 @@ function CustomDropdown<T extends { label: string; value: string }>({
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '10px',
                                 width: '100%', padding: '7px 12px',
-                                background: item.value === value ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                                border: 'none', color: 'white', cursor: 'pointer',
+                                background: item.value === value ? '#fff3cd' : 'transparent',
+                                border: 'none', borderBottom: '1px solid #e0e0e0',
+                                color: '#1a1a1a', cursor: 'pointer',
                                 fontSize: '0.85rem', textAlign: 'left',
+                                fontFamily: 'inherit', fontWeight: 500,
                             }}
-                            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-                            onMouseLeave={e => (e.currentTarget.style.background = item.value === value ? 'rgba(59, 130, 246, 0.15)' : 'transparent')}
+                            onMouseEnter={e => (e.currentTarget.style.background = '#f0ebe3')}
+                            onMouseLeave={e => (e.currentTarget.style.background = item.value === value ? '#fff3cd' : 'transparent')}
                         >
                             {renderItem(item, false)}
                         </button>
@@ -111,15 +113,15 @@ export const ControlPanel: React.FC<Props> = ({
                 </button>
                 <button
                     className="btn"
-                    style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', backgroundColor: '#10b981' }}
+                    style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', backgroundColor: 'var(--accent-green)' }}
                     onClick={onDownload}
                     disabled={isDownloading}
                 >
-                    <Download size={14} /> {isDownloading ? 'Generating...' : 'Download'}
+                    <Download size={14} /> {isDownloading ? 'Wait...' : 'Download'}
                 </button>
             </div>
 
-            <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: 0 }} />
+            <hr />
 
             {/* Two-column controls grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -221,7 +223,7 @@ export const ControlPanel: React.FC<Props> = ({
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
                         <label className="label" style={{ marginBottom: 0 }}>Icon Size</label>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{config.iconSize}px</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>{config.iconSize}px</span>
                     </div>
                     <input
                         type="range" min="50" max="600"
@@ -233,7 +235,7 @@ export const ControlPanel: React.FC<Props> = ({
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
                         <label className="label" style={{ marginBottom: 0 }}>Text Size</label>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{config.fontSize}px</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>{config.fontSize}px</span>
                     </div>
                     <input
                         type="range" min="20" max="250"
@@ -244,23 +246,29 @@ export const ControlPanel: React.FC<Props> = ({
                 </div>
             </div>
 
-            <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: 0 }} />
+            <hr />
 
             {/* Preview Toggle */}
-            <div style={{ display: 'flex', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '10px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                     className={`btn ${previewMode === 'square' ? '' : 'btn-secondary'}`}
-                    style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }}
+                    style={{
+                        flex: 1, padding: '6px', fontSize: '0.8rem',
+                        ...(previewMode === 'square' ? { backgroundColor: 'var(--accent-blue)' } : {}),
+                    }}
                     onClick={() => setPreviewMode('square')}
                 >
-                    Square
+                    ◼ Square
                 </button>
                 <button
                     className={`btn ${previewMode === 'circle' ? '' : 'btn-secondary'}`}
-                    style={{ flex: 1, padding: '6px', fontSize: '0.8rem' }}
+                    style={{
+                        flex: 1, padding: '6px', fontSize: '0.8rem',
+                        ...(previewMode === 'circle' ? { backgroundColor: 'var(--accent-purple)' } : {}),
+                    }}
                     onClick={() => setPreviewMode('circle')}
                 >
-                    Circle
+                    ● Circle
                 </button>
             </div>
 

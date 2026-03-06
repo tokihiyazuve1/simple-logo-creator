@@ -275,8 +275,14 @@ function App() {
         gap: '12px',
       }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem', marginBottom: '4px', fontWeight: 800 }}>Logo Creator</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0' }}>
+          <h1 style={{
+            fontSize: '1.8rem', marginBottom: '4px', fontWeight: 900,
+            fontFamily: "'Space Grotesk', sans-serif",
+            letterSpacing: '-0.02em',
+          }}>
+            Logo Creator<span style={{ color: 'var(--accent)' }}>.</span>
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0', fontWeight: 500 }}>
             Generate profile pictures for TikTok or Shopee.
           </p>
         </div>
