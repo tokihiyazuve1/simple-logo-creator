@@ -5,7 +5,7 @@ import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { LogoPreview } from './components/LogoPreview';
-import { ControlPanel } from './components/ControlPanel';
+import { LeftPanel, RightPanel } from './components/ControlPanel';
 import { PALETTES, FONTS, ICONS, ICON_MAP, LOGO_STYLES, BG_PATTERNS, TEXT_CASES, LETTER_SPACINGS, BADGE_SHAPES } from './types';
 import type { LogoConfig } from './types';
 
@@ -266,43 +266,54 @@ function App() {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '1fr 480px',
+      gridTemplateColumns: '300px 1fr 300px',
       height: '100vh',
       overflow: 'hidden',
     }}>
-      {/* Left — Preview */}
+      {/* Left — Style controls */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '16px',
+        overflowY: 'auto',
+      }}>
+        <LeftPanel config={config} setConfig={setConfig} />
+      </div>
+
+      {/* Center — Preview */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '32px',
-      }}>
-        <LogoPreview config={config} previewMode={previewMode} logoRef={logoRef} />
-      </div>
-
-      {/* Right — Controls */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '24px 28px',
-        overflowY: 'auto',
+        padding: '20px',
         gap: '12px',
       }}>
         <div>
           <h1 style={{
-            fontSize: '1.8rem', marginBottom: '4px', fontWeight: 900,
+            fontSize: '1.6rem', marginBottom: '4px', fontWeight: 900,
             fontFamily: "'Space Grotesk', sans-serif",
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.02em', textAlign: 'center',
           }}>
             Logo Creator<span style={{ color: 'var(--accent)' }}>.</span>
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0', fontWeight: 500 }}>
-            Generate profile pictures for TikTok or Shopee.
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '0', fontWeight: 500, textAlign: 'center' }}>
+            Generate profile pictures for TikTok or Shopee
           </p>
         </div>
-        <ControlPanel
+        <LogoPreview config={config} previewMode={previewMode} logoRef={logoRef} />
+      </div>
+
+      {/* Right — Core controls */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '16px',
+        overflowY: 'auto',
+      }}>
+        <RightPanel
           config={config}
           setConfig={setConfig}
           previewMode={previewMode}
