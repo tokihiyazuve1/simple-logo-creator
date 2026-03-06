@@ -1,5 +1,6 @@
 import type { LogoConfig } from '../types';
 import { ICON_MAP } from '../types';
+import type { CSSProperties } from 'react';
 
 interface Props {
     config: LogoConfig;
@@ -7,8 +8,77 @@ interface Props {
     logoRef?: React.RefObject<HTMLDivElement | null>;
 }
 
+/** Returns CSS styles for text and icon based on the selected logo style */
+function getStyleEffects(config: LogoConfig): { text: CSSProperties; icon: CSSProperties } {
+    const s = config.logoStyle;
+    const c = config.iconColor;
+    const t = config.textColor;
+
+    switch (s) {
+        case 'neo-brutal':
+            return {
+                text: {
+                    WebkitTextStroke: '3px #1a1a1a',
+                    paintOrder: 'stroke fill',
+                    textShadow: '5px 5px 0px #1a1a1a',
+                },
+                icon: {
+                    filter: 'drop-shadow(5px 5px 0px #1a1a1a)',
+                    strokeWidth: 2.5,
+                },
+            };
+        case 'outlined':
+            return {
+                text: {
+                    WebkitTextStroke: `3px ${t}`,
+                    color: 'transparent',
+                    paintOrder: 'stroke fill',
+                },
+                icon: {
+                    color: 'transparent',
+                    stroke: c,
+                    strokeWidth: 2,
+                    filter: 'none',
+                },
+            };
+        case 'shadow-pop':
+            return {
+                text: {
+                    textShadow: `6px 6px 0px ${c}`,
+                },
+                icon: {
+                    filter: `drop-shadow(6px 6px 0px ${t})`,
+                },
+            };
+        case 'sticker':
+            return {
+                text: {
+                    WebkitTextStroke: '8px #ffffff',
+                    paintOrder: 'stroke fill',
+                    filter: 'drop-shadow(2px 2px 0px rgba(0,0,0,0.15))',
+                },
+                icon: {
+                    filter: 'drop-shadow(0px 0px 0px #ffffff) drop-shadow(0px 0px 0px #ffffff) drop-shadow(0px 0px 8px #ffffff) drop-shadow(2px 2px 0px rgba(0,0,0,0.15))',
+                },
+            };
+        case 'glow':
+            return {
+                text: {
+                    textShadow: `0 0 20px ${c}, 0 0 40px ${c}, 0 0 60px ${c}`,
+                },
+                icon: {
+                    filter: `drop-shadow(0 0 12px ${t}) drop-shadow(0 0 24px ${t})`,
+                },
+            };
+        case 'clean':
+        default:
+            return { text: {}, icon: {} };
+    }
+}
+
 export const LogoPreview: React.FC<Props> = ({ config, previewMode, logoRef }) => {
     const IconComponent = ICON_MAP[config.icon] || ICON_MAP['ShoppingBag'];
+    const effects = getStyleEffects(config);
 
     const logoContent = (
         <div
@@ -28,11 +98,14 @@ export const LogoPreview: React.FC<Props> = ({ config, previewMode, logoRef }) =
             }}
         >
             {config.layout !== 'text-only' && (
-                <IconComponent
-                    size={config.iconSize}
-                    color={config.iconColor}
-                    strokeWidth={1.5}
-                />
+                <div style={effects.icon}>
+                    <IconComponent
+                        size={config.iconSize}
+                        color={config.logoStyle === 'outlined' ? 'transparent' : config.iconColor}
+                        strokeWidth={config.logoStyle === 'outlined' ? 2 : 1.5}
+                        stroke={config.iconColor}
+                    />
+                </div>
             )}
 
             {config.layout !== 'icon-only' && (
@@ -44,6 +117,7 @@ export const LogoPreview: React.FC<Props> = ({ config, previewMode, logoRef }) =
                         textAlign: 'center',
                         lineHeight: 1.1,
                         wordBreak: 'break-word',
+                        ...effects.text,
                     }}
                 >
                     {config.name || 'My Shop'}

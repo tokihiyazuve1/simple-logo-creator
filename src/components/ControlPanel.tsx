@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FONTS, ICONS, PALETTES, ICON_MAP } from '../types';
+import { FONTS, ICONS, PALETTES, ICON_MAP, LOGO_STYLES } from '../types';
 import type { LogoConfig } from '../types';
 import { RefreshCw, Download, ChevronDown } from 'lucide-react';
 
@@ -163,6 +163,22 @@ export const ControlPanel: React.FC<Props> = ({
                         <option value="text-only">Text Only</option>
                         <option value="icon-only">Icon Only</option>
                     </select>
+                </div>
+
+                {/* Logo Style — full width */}
+                <div style={{ gridColumn: '1 / -1' }}>
+                    <CustomDropdown
+                        label="Logo Style"
+                        items={LOGO_STYLES.map(s => ({ label: s.label, value: s.value, desc: s.desc }))}
+                        value={config.logoStyle}
+                        onChange={val => handleChange('logoStyle', val)}
+                        renderItem={(item) => (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontWeight: 700 }}>{item.label}</span>
+                                <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>{(item as any).desc}</span>
+                            </span>
+                        )}
+                    />
                 </div>
 
                 {/* Icon — full width with preview */}

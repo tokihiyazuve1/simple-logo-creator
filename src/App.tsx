@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import { LogoPreview } from './components/LogoPreview';
 import { ControlPanel } from './components/ControlPanel';
-import { PALETTES, FONTS, ICONS, ICON_MAP } from './types';
+import { PALETTES, FONTS, ICONS, ICON_MAP, LOGO_STYLES } from './types';
 import type { LogoConfig } from './types';
 
 import './index.css';
@@ -22,6 +22,7 @@ function App() {
     iconColor: PALETTES[0].icon,
     iconSize: 200,
     fontSize: 100,
+    logoStyle: 'clean',
   });
 
   const [previewMode, setPreviewMode] = useState<'circle' | 'square'>('square');
@@ -33,6 +34,8 @@ function App() {
     const randomFont = FONTS[Math.floor(Math.random() * FONTS.length)];
     const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
 
+    const randomStyle = LOGO_STYLES[Math.floor(Math.random() * LOGO_STYLES.length)];
+
     setConfig(prev => ({
       ...prev,
       bgColor: randomPalette.bg,
@@ -40,6 +43,7 @@ function App() {
       iconColor: randomPalette.icon,
       fontFamily: randomFont,
       icon: randomIcon,
+      logoStyle: randomStyle.value,
     }));
   };
 

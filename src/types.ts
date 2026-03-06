@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+export type LogoStyle = 'clean' | 'neo-brutal' | 'outlined' | 'shadow-pop' | 'sticker' | 'glow';
+
 export interface LogoConfig {
   name: string;
   fontFamily: string;
@@ -25,7 +27,17 @@ export interface LogoConfig {
   iconColor: string;
   fontSize: number;
   iconSize: number;
+  logoStyle: LogoStyle;
 }
+
+export const LOGO_STYLES: { value: LogoStyle; label: string; desc: string }[] = [
+  { value: 'clean', label: 'Clean', desc: 'Flat, minimal, no effects' },
+  { value: 'neo-brutal', label: 'Neo-Brutal', desc: 'Thick outlines + hard shadow' },
+  { value: 'outlined', label: 'Outlined', desc: 'Stroke only, no fill' },
+  { value: 'shadow-pop', label: 'Shadow Pop', desc: 'Chunky colored offset shadow' },
+  { value: 'sticker', label: 'Sticker', desc: 'Thick white border cutout' },
+  { value: 'glow', label: 'Glow', desc: 'Soft colored halo' },
+];
 
 export const FONTS = [
   // Sans-Serif
