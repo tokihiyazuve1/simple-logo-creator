@@ -169,6 +169,11 @@ function App() {
     clone.style.transform = 'none';
     clone.style.backgroundColor = isTransparent ? 'transparent' : targetConfig.bgColor;
 
+    // Strip background pattern for non-main variations
+    if (targetConfig.bgPattern === 'none' || isTransparent) {
+      clone.style.backgroundImage = 'none';
+    }
+
     // Override text & icon colors for monochrome variations
     if (targetConfig.textColor !== config.textColor) {
       const textNode = clone.querySelector('div > div') as HTMLElement;
@@ -181,6 +186,14 @@ function App() {
       svgEl.style.color = targetConfig.iconColor;
       svgEl.querySelectorAll('[stroke]').forEach(el => {
         el.setAttribute('stroke', targetConfig.iconColor);
+      });
+    }
+
+    // Override badge SVG stroke color for monochrome variations
+    const badgeSvg = clone.querySelector('div[style*="grid"] > svg') as SVGElement | null;
+    if (badgeSvg && targetConfig.textColor !== config.textColor) {
+      badgeSvg.querySelectorAll('[stroke]').forEach(el => {
+        el.setAttribute('stroke', targetConfig.textColor);
       });
     }
 
@@ -240,9 +253,9 @@ function App() {
 
       const variations = [
         { name: 'Main', cfg: config, trans: false },
-        { name: 'Transparent', cfg: { ...config, bgColor: 'transparent' }, trans: true },
-        { name: 'Black', cfg: { ...config, bgColor: 'transparent', textColor: '#000000', iconColor: '#000000' }, trans: true },
-        { name: 'White', cfg: { ...config, bgColor: 'transparent', textColor: '#ffffff', iconColor: '#ffffff' }, trans: true },
+        { name: 'Transparent', cfg: { ...config, bgColor: 'transparent', bgPattern: 'none' as const }, trans: true },
+        { name: 'Black', cfg: { ...config, bgColor: 'transparent', bgPattern: 'none' as const, textColor: '#000000', iconColor: '#000000' }, trans: true },
+        { name: 'White', cfg: { ...config, bgColor: 'transparent', bgPattern: 'none' as const, textColor: '#ffffff', iconColor: '#ffffff' }, trans: true },
       ];
 
       const prefix = config.name.replace(/\s+/g, '_');
