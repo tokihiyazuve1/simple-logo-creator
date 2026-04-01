@@ -267,9 +267,12 @@ function App() {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '300px 1fr 300px',
+      gridTemplateColumns: '280px auto 280px',
+      justifyContent: 'center',
+      gap: '12px',
       height: '100vh',
       overflow: 'hidden',
+      padding: '0 16px',
     }}>
       {/* Left — Style controls */}
       <div style={{
@@ -288,8 +291,8 @@ function App() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
-        gap: '12px',
+        padding: '12px 0',
+        gap: '8px',
       }}>
         <div>
           <h1 style={{

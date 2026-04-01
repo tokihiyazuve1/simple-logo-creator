@@ -212,11 +212,11 @@ export const LogoPreview: React.FC<Props> = ({ config, previewMode, logoRef }) =
     );
 
     return (
-        <div className="preview-container">
+        <div className="preview-container" style={{ width: '500px', height: '500px' }}>
             <div
                 className={`preview-scaler ${previewMode === 'circle' ? 'circle-crop' : ''}`}
                 style={{
-                    transform: 'scale(0.5)',
+                    transform: 'scale(0.625)',
                     transformOrigin: 'top left',
                     width: '800px',
                     height: '800px',
