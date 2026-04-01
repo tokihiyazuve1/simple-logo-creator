@@ -174,26 +174,46 @@ function App() {
       clone.style.backgroundImage = 'none';
     }
 
-    // Override text & icon colors for monochrome variations
-    if (targetConfig.textColor !== config.textColor) {
-      const textNode = clone.querySelector('div > div') as HTMLElement;
-      if (textNode) textNode.style.color = targetConfig.textColor;
-    }
-    // Override SVG icon color (target the icon inside the grid cell, not the badge SVG)
-    const iconWrapper = clone.querySelector('div[style*="grid"] > div');
-    const svgEl = iconWrapper?.querySelector('svg') as SVGElement | null;
-    if (svgEl && targetConfig.iconColor !== config.iconColor) {
-      svgEl.style.color = targetConfig.iconColor;
-      svgEl.querySelectorAll('[stroke]').forEach(el => {
-        el.setAttribute('stroke', targetConfig.iconColor);
-      });
-    }
+    // For monochrome variations (White/Black), force ALL colors
+    const isMonochrome = targetConfig.textColor !== config.textColor ||
+                         targetConfig.iconColor !== config.iconColor;
 
-    // Override badge SVG stroke color for monochrome variations
-    const badgeSvg = clone.querySelector('div[style*="grid"] > svg') as SVGElement | null;
-    if (badgeSvg && targetConfig.textColor !== config.textColor) {
-      badgeSvg.querySelectorAll('[stroke]').forEach(el => {
-        el.setAttribute('stroke', targetConfig.textColor);
+    if (isMonochrome) {
+      // Force text color on all non-SVG child divs
+      clone.querySelectorAll('div').forEach(el => {
+        const style = (el as HTMLElement).style;
+        if (style.color) {
+          style.color = targetConfig.textColor;
+        }
+      });
+      // Also set on direct text container children of the clone
+      const children = clone.children;
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i] as HTMLElement;
+        if (child.tagName === 'DIV' && !child.querySelector('svg')) {
+          child.style.color = targetConfig.textColor;
+        }
+      }
+
+      // Force ALL SVG elements: icon color + stroke
+      clone.querySelectorAll('svg').forEach(svg => {
+        (svg as unknown as HTMLElement).style.color = targetConfig.iconColor;
+        svg.querySelectorAll('[stroke]').forEach(el => {
+          el.setAttribute('stroke', targetConfig.iconColor);
+        });
+        // Also override fill if it was set to a color (not 'none')
+        svg.querySelectorAll('[fill]').forEach(el => {
+          const fill = el.getAttribute('fill');
+          if (fill && fill !== 'none' && fill !== 'transparent') {
+            el.setAttribute('fill', targetConfig.iconColor);
+          }
+        });
+      });
+
+      // Force the text div specifically (last direct child div without SVG)
+      const allDirectDivs = clone.querySelectorAll(':scope > div');
+      allDirectDivs.forEach(div => {
+        (div as HTMLElement).style.color = targetConfig.textColor;
       });
     }
 
