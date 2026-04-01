@@ -174,8 +174,9 @@ function App() {
       const textNode = clone.querySelector('div > div') as HTMLElement;
       if (textNode) textNode.style.color = targetConfig.textColor;
     }
-    // Override SVG icon color
-    const svgEl = clone.querySelector('svg') as SVGElement;
+    // Override SVG icon color (target the icon inside the grid cell, not the badge SVG)
+    const iconWrapper = clone.querySelector('div[style*="grid"] > div');
+    const svgEl = iconWrapper?.querySelector('svg') as SVGElement | null;
     if (svgEl && targetConfig.iconColor !== config.iconColor) {
       svgEl.style.color = targetConfig.iconColor;
       svgEl.querySelectorAll('[stroke]').forEach(el => {

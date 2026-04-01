@@ -80,10 +80,11 @@ function IconBadge({ shape, color, size }: { shape: BadgeShape; color: string; s
 
     return (
         <svg viewBox={`0 0 ${total} ${total}`} style={{
-            position: 'absolute', top: '50%', left: '50%',
             width: `${total}px`, height: `${total}px`,
-            transform: 'translate(-50%, -50%)',
             pointerEvents: 'none',
+            gridArea: '1 / 1',
+            alignSelf: 'center',
+            justifySelf: 'center',
         }}>
             {shapeEl}
         </svg>
@@ -172,13 +173,20 @@ export const LogoPreview: React.FC<Props> = ({ config, previewMode, logoRef }) =
             }}
         >
             {config.layout !== 'text-only' && (
-                <div style={{ ...effects.icon, position: 'relative' as const, flexShrink: 0 }}>
-                    <IconComponent
-                        size={config.iconSize}
-                        color={config.logoStyle === 'outlined' ? 'transparent' : config.iconColor}
-                        strokeWidth={config.logoStyle === 'outlined' ? 2 : 1.5}
-                        stroke={config.iconColor}
-                    />
+                <div style={{
+                    ...effects.icon,
+                    display: 'grid',
+                    placeItems: 'center',
+                    flexShrink: 0,
+                }}>
+                    <div style={{ gridArea: '1 / 1' }}>
+                        <IconComponent
+                            size={config.iconSize}
+                            color={config.logoStyle === 'outlined' ? 'transparent' : config.iconColor}
+                            strokeWidth={config.logoStyle === 'outlined' ? 2 : 1.5}
+                            stroke={config.iconColor}
+                        />
+                    </div>
                     <IconBadge shape={config.badgeShape} color={config.textColor} size={config.iconSize} />
                 </div>
             )}
