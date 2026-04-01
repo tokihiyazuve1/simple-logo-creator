@@ -57,8 +57,8 @@ function CustomDropdown<T extends { label: string; value: string }>({
                 <div style={{
                     position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
                     marginTop: '4px', maxHeight: '220px', overflowY: 'auto',
-                    background: '#ffffff', border: '3px solid #1a1a1a',
-                    borderRadius: '6px', boxShadow: '5px 5px 0px #1a1a1a',
+                    background: 'var(--dropdown-bg)', border: '3px solid var(--border)',
+                    borderRadius: '6px', boxShadow: 'var(--shadow)',
                 }}>
                     {items.map(item => (
                         <button
@@ -68,14 +68,15 @@ function CustomDropdown<T extends { label: string; value: string }>({
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '10px',
                                 width: '100%', padding: '7px 12px',
-                                background: item.value === value ? '#fff3cd' : 'transparent',
-                                border: 'none', borderBottom: '1px solid #e0e0e0',
-                                color: '#1a1a1a', cursor: 'pointer',
+                                background: item.value === value ? 'var(--dropdown-active)' : 'transparent',
+                                border: 'none', borderBottom: '1px solid var(--border)',
+                                borderBottomStyle: 'solid', borderBottomWidth: '1px', opacity: 1,
+                                color: 'var(--text-main)', cursor: 'pointer',
                                 fontSize: '0.85rem', textAlign: 'left',
                                 fontFamily: 'inherit', fontWeight: 500,
                             }}
-                            onMouseEnter={e => (e.currentTarget.style.background = '#f0ebe3')}
-                            onMouseLeave={e => (e.currentTarget.style.background = item.value === value ? '#fff3cd' : 'transparent')}
+                            onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                            onMouseLeave={e => (e.currentTarget.style.background = item.value === value ? 'var(--dropdown-active)' : 'transparent')}
                         >
                             {renderItem(item, false)}
                         </button>

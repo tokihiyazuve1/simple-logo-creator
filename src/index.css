@@ -3,11 +3,14 @@
 /* ═══════════════════════════════════════════
    NEO-BRUTALISM DESIGN SYSTEM
    Bold borders • Hard shadows • Raw energy
+   Light + Dark themes
    ═══════════════════════════════════════════ */
 
-:root {
+/* ── Light Theme (default) ── */
+:root, [data-theme="light"] {
   --bg-primary: #e8e0d4;
   --bg-secondary: #ffffff;
+  --bg-hover: #f0ebe3;
   --accent: #ff6b35;
   --accent-hover: #e55a2b;
   --accent-green: #2ec866;
@@ -18,10 +21,36 @@
   --text-muted: #5a5a5a;
   --border: #1a1a1a;
   --border-width: 3px;
-  --shadow: 5px 5px 0px #1a1a1a;
-  --shadow-sm: 3px 3px 0px #1a1a1a;
-  --shadow-hover: 7px 7px 0px #1a1a1a;
+  --shadow-color: #1a1a1a;
+  --shadow: 5px 5px 0px var(--shadow-color);
+  --shadow-sm: 3px 3px 0px var(--shadow-color);
+  --shadow-hover: 7px 7px 0px var(--shadow-color);
   --radius: 6px;
+  --dropdown-bg: #ffffff;
+  --dropdown-active: #fff3cd;
+  --slider-track: #e8e0d4;
+}
+
+/* ── Dark Theme ── */
+[data-theme="dark"] {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-hover: #1f2b47;
+  --accent: #ff6b35;
+  --accent-hover: #ff8a5c;
+  --accent-green: #2ec866;
+  --accent-blue: #5a8cff;
+  --accent-purple: #b07cff;
+  --text-main: #e8e0d4;
+  --text-muted: #8a8a9a;
+  --border: #e8e0d4;
+  --shadow-color: #0d0d1a;
+  --shadow: 5px 5px 0px var(--shadow-color);
+  --shadow-sm: 3px 3px 0px var(--shadow-color);
+  --shadow-hover: 7px 7px 0px var(--shadow-color);
+  --dropdown-bg: #16213e;
+  --dropdown-active: #2a2a4e;
+  --slider-track: #0f3460;
 }
 
 * {
@@ -37,6 +66,7 @@ body {
   min-height: 100vh;
   margin: 0;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ── Neo-Brutal Panel ── */
@@ -45,6 +75,7 @@ body {
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 /* ── Buttons ── */
@@ -75,7 +106,7 @@ body {
 
 .btn:active {
   transform: translate(3px, 3px);
-  box-shadow: 0px 0px 0px #1a1a1a;
+  box-shadow: 0px 0px 0px var(--shadow-color);
 }
 
 .btn-secondary {
@@ -85,7 +116,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background-color: #f0ebe3;
+  background-color: var(--bg-hover);
   transform: translate(-2px, -2px);
   box-shadow: var(--shadow-hover);
 }
@@ -101,13 +132,19 @@ body {
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
 }
 
 .input-field:focus {
   outline: none;
   transform: translate(-2px, -2px);
   box-shadow: var(--shadow-sm);
+}
+
+/* ── Select styling for dark mode ── */
+select.input-field option {
+  background-color: var(--bg-secondary);
+  color: var(--text-main);
 }
 
 /* ── Labels ── */
@@ -148,7 +185,7 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   height: 10px;
-  background: var(--bg-primary);
+  background: var(--slider-track);
   border: 2px solid var(--border);
   border-radius: 0;
   cursor: pointer;
@@ -163,7 +200,7 @@ input[type="range"]::-webkit-slider-thumb {
   border: var(--border-width) solid var(--border);
   border-radius: 0;
   cursor: pointer;
-  box-shadow: 2px 2px 0px #1a1a1a;
+  box-shadow: 2px 2px 0px var(--shadow-color);
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -173,7 +210,7 @@ input[type="range"]::-moz-range-thumb {
   border: var(--border-width) solid var(--border);
   border-radius: 0;
   cursor: pointer;
-  box-shadow: 2px 2px 0px #1a1a1a;
+  box-shadow: 2px 2px 0px var(--shadow-color);
 }
 
 /* ── Dividers ── */
@@ -202,6 +239,34 @@ hr {
 .preview-scaler.circle-crop {
   border-radius: 50%;
   overflow: hidden;
+}
+
+/* ── Theme Toggle ── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--bg-secondary);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  color: var(--text-main);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.theme-toggle:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.theme-toggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 /* ── Scrollbar ── */

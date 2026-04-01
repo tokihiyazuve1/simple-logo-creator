@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -277,28 +277,42 @@ function App() {
     }
   };
 
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
+
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '280px auto 280px',
+      gridTemplateColumns: '310px auto 310px',
       justifyContent: 'center',
-      gap: '12px',
+      gap: '16px',
       height: '100vh',
       overflow: 'hidden',
-      padding: '0 16px',
+      padding: '0 20px',
     }}>
-      {/* Left — Style controls */}
+      {/* Left -- Style controls */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        padding: '16px',
+        padding: '16px 8px',
         overflowY: 'auto',
       }}>
         <LeftPanel config={config} setConfig={setConfig} />
       </div>
 
-      {/* Center — Preview */}
+      {/* Center -- Preview */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -307,27 +321,32 @@ function App() {
         padding: '12px 0',
         gap: '8px',
       }}>
-        <div>
-          <h1 style={{
-            fontSize: '1.6rem', marginBottom: '4px', fontWeight: 900,
-            fontFamily: "'Space Grotesk', sans-serif",
-            letterSpacing: '-0.02em', textAlign: 'center',
-          }}>
-            Logo Creator<span style={{ color: 'var(--accent)' }}>.</span>
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '0', fontWeight: 500, textAlign: 'center' }}>
-            Generate profile pictures for TikTok or Shopee
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div>
+            <h1 style={{
+              fontSize: '1.6rem', marginBottom: '2px', fontWeight: 900,
+              fontFamily: "'Space Grotesk', sans-serif",
+              letterSpacing: '-0.02em', textAlign: 'center',
+            }}>
+              Logo Creator<span style={{ color: 'var(--accent)' }}>.</span>
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '0', fontWeight: 500, textAlign: 'center' }}>
+              Generate profile pictures for TikTok or Shopee
+            </p>
+          </div>
+          <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
+            {theme === 'light' ? '\uD83C\uDF19' : '\u2600\uFE0F'}
+          </button>
         </div>
         <LogoPreview config={config} previewMode={previewMode} logoRef={logoRef} />
       </div>
 
-      {/* Right — Core controls */}
+      {/* Right -- Core controls */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        padding: '16px',
+        padding: '16px 8px',
         overflowY: 'auto',
       }}>
         <RightPanel
