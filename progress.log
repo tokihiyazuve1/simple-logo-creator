@@ -1,0 +1,35 @@
+# Progress Log
+
+## February 21, 2026 - Initial Development
+*   **[Setup]** Initialized Vite + React + TypeScript project using Bun.
+*   **[Setup]** Installed core dependencies: `lucide-react`, `html2canvas`, `jszip`, `file-saver`.
+*   **[UI]** Created `index.css` applying a dark-themed, premium glassmorphism aesthetic across the app.
+*   **[Data]** Defined core data structures (`LogoConfig`) and constants containing curated color palettes, icons, and starting fonts in `src/types.ts`.
+*   **[Component]** Built `LogoPreview.tsx` to handle the visual representation of the logo, adding the "Circle Crop" preview feature for TikTok/Shopee testing.
+*   **[Component]** Built `ControlPanel.tsx` to handle user inputs (name, colors, layouts).
+*   **[Logic]** Implemented "Suggest Design" randomization logic in `App.tsx`.
+*   **[Export]** Built the bulk-export system in `App.tsx`:
+    *   Implemented `html2canvas` rendering for PNG exports.
+    *   Implemented programmatic SVG string construction for raw, infinitely scalable vector exports.
+    *   Tied outputs into a single `JSZip` bundle containing 8 files (Main, Transparent, Black, White -> PNG + SVG).
+*   **[Config]** Modified `vite.config.ts` to strictly run the server on port `3500` to avoid conflicts.
+*   **[Feature]** Expanded the font library in `src/types.ts` and `index.css` from 4 to 11 Google Fonts (added Righteous, Permanent Marker, Pacifico, Bebas Neue, Cinzel, Lobster, Montserrat).
+*   **[Feature]** Added clickable preset Color Palettes to the Control Panel.
+*   **[Bugfix]** Fixed an issue in the PNG export logic (`App.tsx`) where the text color of the Main logo would revert to the default instead of the user's selected color after generating monochrome versions.
+*   **[Layout]** Adjusted the "Icon Left" layout to have tighter, proportional spacing between the icon and the text across both the live preview and the vector exports.
+*   **[Feature]** Overhauled Customization limits:
+    *   Expanded `ICONS` library from 11 to 32 modern choices.
+    *   Expanded `PALETTES` library from 5 to 25 curated themes across 5 categories (Dark, Minimalist, Vibrant, Earthy, High Contrast).
+    *   Replaced the color swatch UI with a clean `select` Dropdown for the 25 themes.
+    *   Added dynamic `Range` sliders allowing manual, granular control over `Icon Size` (50px to 600px) and `Text Size` (20px to 250px). The SVG export engine respects these new sizes.
+*   **[Documentation]** Created `README.md`, `progress.log`, and `agent-notes.md` for project handoff.
+
+### 2026-02-23 — Optimization Pass
+*   **[Bugfix]** Fixed `handleChange` type signature from `string` to `string | number`, preventing slider values from being silently stored as strings.
+*   **[Bugfix]** Removed duplicate palette UI — old color swatches were rendering alongside the new dropdown.
+*   **[Perf]** Batched palette selection into a single `setConfig` call (was triggering 3 re-renders per click).
+*   **[Perf]** Replaced `import * as LucideIcons` with explicit named imports for only the 32 used icons. **Bundle size reduced 45% (1,299 kB → 712 kB).**
+*   **[Cleanup]** Deleted unused `App.css` (Vite boilerplate). Removed dead commented-out code in `App.tsx`.
+*   **[SEO]** Fixed `index.html` title from "temp-app" to "Simple Logo Creator", added meta description.
+*   **[SEO]** Renamed `package.json` name from `"temp-app"` to `"simple-logo-creator"`.
+*   **[UX]** Moved inline `<style>` from `LogoPreview.tsx` to `index.css` to prevent re-creation on every render.
